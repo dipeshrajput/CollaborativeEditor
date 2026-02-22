@@ -1,0 +1,349 @@
+* {
+  box-sizing: border-box;
+}
+
+:root {
+  color-scheme: light;
+  --bg: #f8fafc;
+  --panel: #ffffff;
+  --text: #0f172a;
+  --muted: #5b6b85;
+  --accent: #f97316;
+  --accent-dark: #ea580c;
+  --ring: rgba(249, 115, 22, 0.25);
+  --shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+  --border: rgba(15, 23, 42, 0.08);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Manrope", system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, #fff1e7 0%, transparent 45%),
+    radial-gradient(circle at 20% 20%, #e2e8f0 0%, transparent 55%),
+    var(--bg);
+  padding: 32px 20px 48px;
+}
+
+h1, h2, h3 {
+  font-family: "Fraunces", "Times New Roman", serif;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brand {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.brand-mark {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fb923c, #fdba74);
+  color: #1f2937;
+  box-shadow: 0 16px 30px rgba(249, 115, 22, 0.35);
+  letter-spacing: 1px;
+}
+
+.brand-overline {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.status-card {
+  background: var(--panel);
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  min-width: 220px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.status-online {
+  background: rgba(34, 197, 94, 0.16);
+  color: #15803d;
+}
+
+.status-offline {
+  background: rgba(148, 163, 184, 0.2);
+  color: #475569;
+}
+
+.status-error {
+  background: rgba(248, 113, 113, 0.2);
+  color: #b91c1c;
+}
+
+.status-meta {
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.status-host {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.controls {
+  background: var(--panel);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  padding: 16px 20px;
+  display: grid;
+  grid-template-columns: minmax(180px, 220px) 1fr auto;
+  gap: 16px;
+  align-items: center;
+  box-shadow: var(--shadow);
+}
+
+.control span {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  font-weight: 600;
+  background: #fff;
+  font-size: 14px;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  font-weight: 600;
+  background: #fff;
+  font-size: 14px;
+}
+
+.button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn {
+  border: none;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+.btn.primary {
+  background: var(--accent);
+  color: #1f2937;
+  box-shadow: 0 12px 24px rgba(249, 115, 22, 0.3);
+}
+
+.btn.primary:hover {
+  background: var(--accent-dark);
+  transform: translateY(-1px);
+}
+
+.btn.ghost {
+  background: #f1f5f9;
+  color: var(--text);
+}
+
+.btn.ghost:hover {
+  background: #e2e8f0;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.toggle input {
+  accent-color: var(--accent);
+}
+
+.editor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr);
+  gap: 24px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.panel-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.panel-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.panel-stats strong {
+  color: var(--text);
+}
+
+textarea {
+  width: 100%;
+  min-height: 360px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  padding: 16px;
+  font-size: 16px;
+  line-height: 1.6;
+  font-family: "Manrope", system-ui, sans-serif;
+  resize: vertical;
+  background: #f8fafc;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--ring);
+}
+
+textarea.no-wrap {
+  white-space: pre;
+  overflow-wrap: normal;
+}
+
+.helper {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.side-panel .panel-header {
+  justify-content: flex-start;
+}
+
+.session-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.session-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--muted);
+  border-bottom: 1px dashed var(--border);
+  padding-bottom: 8px;
+}
+
+.session-list strong {
+  color: var(--text);
+}
+
+.session-card {
+  background: linear-gradient(145deg, #fff7ed, #ffedd5);
+  border-radius: 18px;
+  padding: 16px;
+  border: 1px solid rgba(251, 146, 60, 0.2);
+  color: #9a3412;
+}
+
+.session-card h3 {
+  margin-bottom: 8px;
+}
+
+@media (max-width: 960px) {
+  .controls {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .status-card {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 24px 16px 32px;
+  }
+
+  .panel-stats {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .button-group {
+    justify-content: flex-start;
+  }
+}
