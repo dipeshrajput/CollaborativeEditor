@@ -13,7 +13,7 @@ function applyOperation(doc, op) {
 async function reconstruction(document_id) {
  
     const snapshot = await getLatestSnapshot(document_id);
-
+   // tradeoff for 100 instead of 50 is that we save snapshots less frequently, which can lead to longer reconstruction times, but it reduces the overhead of saving snapshots and can improve performance for documents with a large number of operations.
     let text = snapshot ? snapshot.content : '';
     let version = snapshot ? snapshot.version : 0;
     let history = [];
@@ -30,4 +30,4 @@ async function reconstruction(document_id) {
     return { text, version, history };
 }
 
-module.exports = { reconstruction };
+module.exports = { reconstruction };  
