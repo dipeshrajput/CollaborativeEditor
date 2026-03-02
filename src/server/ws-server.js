@@ -4,8 +4,9 @@ const uuid = require('uuid');
 const { WebSocketServer } = require('ws');
 const app = express();
 const pool = require('../db/connection');
-const { saveOperation, getOperations } = require('../db/operations');
+const { saveOperation, getOperations,saveSnapshot,getLatestSnapshot } = require('../db/operations');
 const { reconstruction } = require('../db/reconstruct');
+ 
 async function testConnection() {
     try {
         const client = await pool.connect();
@@ -134,6 +135,7 @@ wss.on('connection', (ws) => {
    if (message.type === 'operation') {
     const doc = getDoc(clients.get(clientId).documentId); 
     let operation = message.operation;
+
     operation.clientId = clientId
     if (operation.baseVersion < doc.version) {
 
@@ -172,7 +174,13 @@ wss.on('connection', (ws) => {
     doc.history.push(operation);
 
     await saveOperation(operation);
-
+    if (doc.version % 100 === 0) {
+        await saveSnapshot({
+        documentId: clients.get(clientId).documentId,
+        version: doc.version,
+        content: doc.text
+    });
+    }
    ws.send(JSON.stringify({ type: 'ack', serverVersion: doc.version }));
     clients.forEach((client, id) => { 
 

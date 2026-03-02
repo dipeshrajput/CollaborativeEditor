@@ -29,7 +29,20 @@ async function getOperations(documentId) {
  )
  return res.rows;
 }    
+async function saveSnapshot(snapshot) {
+  await pool.query(`INSERT INTO snapshots (id, document_id, version, content) VALUES ($1, $2, $3, $4)`,
+    [uuidv4(), snapshot.documentId, snapshot.version, snapshot.content]);
+  
+}
+async function getLatestSnapshot(documentId) {
+  const res = await pool.query('SELECT * FROM snapshots WHERE document_id = $1 ORDER BY version DESC LIMIT 1', [documentId]);
+  return res.rows[0];
+}
+
+
 module.exports = {
     saveOperation,
-    getOperations
+    getOperations,
+    saveSnapshot,
+    getLatestSnapshot
 };
