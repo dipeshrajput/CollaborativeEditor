@@ -38,3 +38,4 @@ Realtime collaborative editor backend with a simple browser client (`public/inde
 **Notes**
 1. The client connects to `ws://localhost:8080` by default.
 2. The server persists every operation to the `operations` table and reconstructs documents on join.
+<img width="1323" height="634" alt="image" src="https://github.com/user-attachments/assets/202186c3-ebad-4109-91d5-22144d4c9605" />
