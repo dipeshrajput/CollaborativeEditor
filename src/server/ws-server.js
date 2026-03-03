@@ -164,18 +164,18 @@ wss.on('connection', (ws) => {
     }
 
     if (operation.type === 'insert') {
-        doc.text =
-            doc.text.slice(0, operation.position) +
-            operation.text +
-            doc.text.slice(operation.position);
+      const chars = Array.from(doc.text);
+      doc.text = chars.slice(0, operation.position).join('') +
+                operation.text +
+                chars.slice(operation.position).join('');
     }
 
     if (operation.type === 'delete') {
-        doc.text =
-            doc.text.slice(0, operation.position) +
-            doc.text.slice(operation.position + operation.length);
+        const chars = Array.from(doc.text);
+        doc.text = chars.slice(0, operation.position).join('') +
+                  chars.slice(operation.position + operation.length).join('');
     }
- 
+  
     doc.version++;
 
     operation.committedVersion = doc.version;    
