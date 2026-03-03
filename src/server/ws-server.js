@@ -6,7 +6,10 @@ const app = express();
 const pool = require('../db/connection');
 const { saveOperation, getOperations,saveSnapshot,getLatestSnapshot } = require('../db/operations');
 const { reconstruction } = require('../db/reconstruct');
- 
+const {Redis} = require('ioredis');
+// keep these
+const publisher = new Redis();
+const subscriber = new Redis();
 async function testConnection() {
     try {
         const client = await pool.connect();
@@ -32,7 +35,7 @@ const wss = new WebSocketServer({ server });
     });
 
 const clients = new Map();
-
+const subscribedChannels = new Set();
 const docs = new Map();
 
 function getDoc(documentId) {
@@ -115,6 +118,15 @@ function transform(op1, op2) {
 
   return op1;
 }
+subscriber.on('message', (channel, message) => {
+    const { operation, serverVersion, senderId } = JSON.parse(message);
+    
+    clients.forEach((client, id) => {
+        if (client.documentId === operation.documentId && id !== senderId) {
+            client.ws.send(JSON.stringify({ type: 'remoteOperation', operation, serverVersion }));
+        }
+    });
+});
 
 wss.on('connection', (ws) => {
 
@@ -182,12 +194,11 @@ wss.on('connection', (ws) => {
     });
     }
    ws.send(JSON.stringify({ type: 'ack', serverVersion: doc.version }));
-    clients.forEach((client, id) => { 
 
-        if(id!== clientId && client.documentId === clients.get(clientId).documentId) {
-        client.ws.send(JSON.stringify({ type: 'remoteOperation', operation, serverVersion: doc.version }));
-    }          
-    });
+ publisher.publish(
+    `doc:${operation.documentId}`,
+    JSON.stringify({ operation, serverVersion: doc.version, senderId: clientId })
+);
 } 
  else if(message.type == 'cursor') {
       clients.forEach((client, id) => {
@@ -211,7 +222,13 @@ wss.on('connection', (ws) => {
             text: doc.text,
             version: doc.version
         }));
-            }
+      
+      const channel = `doc:${message.documentId}`;
+      if (!subscribedChannels.has(channel)) {
+          subscriber.subscribe(channel);
+          subscribedChannels.add(channel);
+      }
+      }
     });
   
   ws.on('close', () => {
