@@ -211,7 +211,7 @@ wss.on('connection', (ws) => {
     else if (message.type == 'join') {
          clients.set(clientId, {ws:ws, documentId: message.documentId});
          console.log(clients.get(clientId).documentId);
-          const doc = getDoc(message.documentId); 
+        const doc = getDoc(message.documentId); 
         const { text, version, history } = await reconstruction(message.documentId);
         doc.text    = text;
         doc.version = version;
