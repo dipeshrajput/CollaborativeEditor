@@ -7,7 +7,6 @@ const pool = require('../db/connection');
 const { saveOperation, getOperations,saveSnapshot,getLatestSnapshot } = require('../db/operations');
 const { reconstruction } = require('../db/reconstruct');
 const {Redis} = require('ioredis');
-// keep these
 const publisher = new Redis();
 const subscriber = new Redis();
 async function testConnection() {
