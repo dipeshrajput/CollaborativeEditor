@@ -5,10 +5,8 @@ const { WebSocketServer } = require("ws");
 const app = express();
 const pool = require("../db/connection");
 const {
-  saveOperation,
-  getOperations,
-  saveSnapshot,
-  getLatestSnapshot,
+  saveOperation, 
+  saveSnapshot, 
 } = require("../db/operations");
 const { reconstruction } = require("../db/reconstruct");
 const { Redis } = require("ioredis");
@@ -149,7 +147,11 @@ wss.on("connection", (ws) => {
     const message = JSON.parse(msg);
 
     if (message.type === "operation") {
-      const doc = getDoc(clients.get(clientId).documentId);
+    
+      const documentId = clients.get(clientId)?.documentId;
+      if (!documentId) return;
+      
+      const doc = getDoc(documentId); ;
       let operation = message.operation;
 
       operation.clientId = clientId;
@@ -186,14 +188,14 @@ wss.on("connection", (ws) => {
 
       operation.committedVersion = doc.version;
 
-      operation.documentId = clients.get(clientId).documentId;
+      operation.documentId = documentId;;
 
       doc.history.push(operation);
 
       await saveOperation(operation);
       if (doc.version % 100 === 0) {
         await saveSnapshot({
-          documentId: clients.get(clientId).documentId,
+          documentId: documentId,
           version: doc.version,
           content: doc.text,
         });
@@ -212,7 +214,7 @@ wss.on("connection", (ws) => {
       clients.forEach((client, id) => {
         if (
           id !== clientId &&
-          client.documentId === clients.get(clientId).documentId
+          client.documentId === documentId
         ) {
           client.ws.send(
             JSON.stringify({ type: "cursor", position: message.position }),
