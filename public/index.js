@@ -4,12 +4,7 @@ let buffer   = null;
 let localOps = 0;
 let currentRoomId = '';
 let pendingRoomId = '';
-const WS_URL =
-  window.location.hostname === "localhost"
-    ? "ws://localhost:8080"
-    : "wss://collaborativeeditor-pfdm.onrender.com";
-
-const ws = new WebSocket(WS_URL);
+const ws = new WebSocket('ws://localhost:8080');
 const textarea = document.getElementById('textForedit');
 const statusBadge = document.getElementById('statusBadge');
 const statusMeta = document.getElementById('statusMeta');
