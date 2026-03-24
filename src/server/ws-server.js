@@ -11,17 +11,18 @@ const {
   saveSnapshot, 
 } = require("../db/operations");
 const { reconstruction } = require("../db/reconstruct");
-const { Redis } = require("ioredis");
+const Redis = require("ioredis");
 
-const publisher = new Redis({
-  host: "redis",
-  port: 6379,
-});
+const redisUrl = process.env.REDIS_URL;
 
-const subscriber = new Redis({
-  host: "redis",
-  port: 6379,
-});
+const publisher = new Redis(redisUrl);
+const subscriber = new Redis(redisUrl);
+
+publisher.on("connect", () => console.log("Publisher connected ✅"));
+subscriber.on("connect", () => console.log("Subscriber connected ✅"));
+
+publisher.on("error", (err) => console.error("Publisher error ❌", err));
+subscriber.on("error", (err) => console.error("Subscriber error ❌", err));
 async function testConnection() {
   try {
     const client = await pool.connect();
