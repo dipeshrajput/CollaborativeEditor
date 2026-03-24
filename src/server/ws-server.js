@@ -12,7 +12,6 @@ const {
 } = require("../db/operations");
 const { reconstruction } = require("../db/reconstruct");
 const { Redis } = require("ioredis");
-
 const publisher = new Redis({
   host: "redis",
   port: 6379,
