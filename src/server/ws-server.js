@@ -4,6 +4,7 @@ const uuid = require("uuid");
 const path =  require("path");
 const { WebSocketServer } = require("ws");
 const app = express();
+const PORT = process.env.PORT || 3000;
 const pool = require("../db/connection");
 const {
   saveOperation, 
@@ -261,6 +262,6 @@ wss.on("connection", (ws) => {
   });
 });
 
-server.listen(8080, () => {
-  console.log("Server running on port 8080");
+server.listen(PORT, () => {
+  console.log("Server running on port", PORT);
 });
