@@ -1,6 +1,7 @@
 const http = require("http");
 const express = require("express");
 const uuid = require("uuid");
+const path =  require("path");
 const { WebSocketServer } = require("ws");
 const app = express();
 const pool = require("../db/connection");
@@ -10,8 +11,16 @@ const {
 } = require("../db/operations");
 const { reconstruction } = require("../db/reconstruct");
 const { Redis } = require("ioredis");
-const publisher = new Redis();
-const subscriber = new Redis();
+
+const publisher = new Redis({
+  host: "redis",
+  port: 6379,
+});
+
+const subscriber = new Redis({
+  host: "redis",
+  port: 6379,
+});
 async function testConnection() {
   try {
     const client = await pool.connect();
@@ -26,10 +35,9 @@ testConnection();
 
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
-
+app.use(express.static(path.join(__dirname, "../../public")));
 app.get("/", (req, res) => {
-  debugger;
-  res.send("Server is running");
+  res.sendFile(path.join(__dirname, "../../public/index.html"));
 });
 
 const clients = new Map();
