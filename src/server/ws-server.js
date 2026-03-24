@@ -12,12 +12,19 @@ const {
 } = require("../db/operations");
 const { reconstruction } = require("../db/reconstruct");
 const Redis = require("ioredis");
+
 const redisUrl = process.env.REDIS_URL;
+
 const publisher = new Redis(redisUrl, {
-  tls: {}
+  tls: {
+    rejectUnauthorized: false
+  }
 });
+
 const subscriber = new Redis(redisUrl, {
-  tls: {}
+  tls: {
+    rejectUnauthorized: false
+  }
 });
 publisher.on("connect", () => console.log("Publisher connected ✅"))
 subscriber.on("connect", () => console.log("Subscriber connected ✅"));
