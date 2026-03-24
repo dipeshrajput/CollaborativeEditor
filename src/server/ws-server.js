@@ -1,23 +1,20 @@
 const http = require("http");
 const express = require("express");
 const uuid = require("uuid");
-const path =  require("path");
+const path = require("path");
 const { WebSocketServer } = require("ws");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const pool = require("../db/connection");
 const {
-  saveOperation, 
-  saveSnapshot, 
+  saveOperation,
+  saveSnapshot,
 } = require("../db/operations");
 const { reconstruction } = require("../db/reconstruct");
-const Redis = require("ioredis");
-const publisher = new Redis(process.env.REDIS_URL);
-const subscriber = new Redis(process.env.REDIS_URL);
-publisher.on("connect", () => console.log("Publisher connected ✅"));
-subscriber.on("connect", () => console.log("Subscriber connected ✅"));
-publisher.on("error", (err) => console.error("Publisher error ❌", err));
-subscriber.on("error", (err) => console.error("Subscriber error ❌", err));
+
+// Redis pub/sub is disabled for now to allow running without Redis (single-instance mode).
+const USE_REDIS = false;
+
 async function testConnection() {
   try {
     const client = await pool.connect();
@@ -86,23 +83,23 @@ function transform(op1, op2) {
 
   // DELETE vs DELETE
   if (op1.type === "delete" && op2.type === "delete") {
-    // op2 completely after op1 → no change
+    // op2 completely after op1 -> no change
     if (op2.position >= op1.position + op1.length) {
       return op1;
     }
-    // op2 completely before op1 → shift position
+    // op2 completely before op1 -> shift position
     if (op2.position + op2.length <= op1.position) {
       op1.position -= op2.length;
       return op1;
     }
-    // op2 completely covers op1 → noop
+    // op2 completely covers op1 -> noop
     if (
       op2.position <= op1.position &&
       op2.position + op2.length >= op1.position + op1.length
     ) {
       return { type: "noop" };
     }
-    // op2 completely inside op1 → shrink
+    // op2 completely inside op1 -> shrink
     if (
       op2.position > op1.position &&
       op2.position + op2.length < op1.position + op1.length
@@ -126,9 +123,8 @@ function transform(op1, op2) {
 
   return op1;
 }
-subscriber.on("message", (channel, message) => {
-  const { operation, serverVersion, senderId } = JSON.parse(message);
 
+function broadcastOperation(operation, serverVersion, senderId) {
   clients.forEach((client, id) => {
     if (client.documentId === operation.documentId && id !== senderId) {
       client.ws.send(
@@ -136,7 +132,7 @@ subscriber.on("message", (channel, message) => {
       );
     }
   });
-});
+}
 
 wss.on("connection", (ws) => {
   const clientId = uuid.v4();
@@ -152,18 +148,17 @@ wss.on("connection", (ws) => {
     const message = JSON.parse(msg);
 
     if (message.type === "operation") {
-    
       const documentId = clients.get(clientId)?.documentId;
       if (!documentId) return;
-      
-      const doc = getDoc(documentId); ;
+
+      const doc = getDoc(documentId);
       let operation = message.operation;
 
       operation.clientId = clientId;
       if (operation.baseVersion < doc.version) {
         const missedOps = doc.history.slice(operation.baseVersion);
 
-        for (let op of missedOps) {
+        for (const op of missedOps) {
           operation = transform(operation, op);
           if (operation.type === "noop") break;
         }
@@ -192,47 +187,40 @@ wss.on("connection", (ws) => {
       doc.version++;
 
       operation.committedVersion = doc.version;
-
-      operation.documentId = documentId;;
-
+      operation.documentId = documentId;
       doc.history.push(operation);
 
       await saveOperation(operation);
       if (doc.version % 100 === 0) {
         await saveSnapshot({
-          documentId: documentId,
+          documentId,
           version: doc.version,
           content: doc.text,
         });
       }
       ws.send(JSON.stringify({ type: "ack", serverVersion: doc.version }));
 
-      publisher.publish(
-        `doc:${operation.documentId}`,
-        JSON.stringify({
-          operation,
-          serverVersion: doc.version,
-          senderId: clientId,
-        }),
-      );
+      if (USE_REDIS) {
+        // Redis publish path intentionally disabled in this mode.
+      } else {
+        broadcastOperation(operation, doc.version, clientId);
+      }
     } else if (message.type == "cursor") {
+      const documentId = clients.get(clientId)?.documentId;
+      if (!documentId) return;
+
       clients.forEach((client, id) => {
-        if (
-          id !== clientId &&
-          client.documentId === documentId
-        ) {
+        if (id !== clientId && client.documentId === documentId) {
           client.ws.send(
             JSON.stringify({ type: "cursor", position: message.position }),
           );
         }
       });
     } else if (message.type == "join") {
-      clients.set(clientId, { ws: ws, documentId: message.documentId });
+      clients.set(clientId, { ws, documentId: message.documentId });
       console.log(clients.get(clientId).documentId);
       const doc = getDoc(message.documentId);
-      const { text, version, history } = await reconstruction(
-        message.documentId,
-      );
+      const { text, version, history } = await reconstruction(message.documentId);
       doc.text = text;
       doc.version = version;
       doc.history = history;
@@ -245,8 +233,8 @@ wss.on("connection", (ws) => {
       );
 
       const channel = `doc:${message.documentId}`;
-      if (!subscribedChannels.has(channel)) {
-        subscriber.subscribe(channel);
+      if (USE_REDIS && !subscribedChannels.has(channel)) {
+        // Redis subscribe path intentionally disabled in this mode.
         subscribedChannels.add(channel);
       }
     }
