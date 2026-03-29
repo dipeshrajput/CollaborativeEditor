@@ -6,6 +6,7 @@ COPY package*.json ./
 
 RUN npm install
 
+COPY init.sql ./init.sql
 COPY . .
 
 EXPOSE 8080
