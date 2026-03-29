@@ -5,23 +5,22 @@ services:
   backend:
     build: .
     ports:
-      -  "5000:8080"
+      -  "8080:8080"
     depends_on:
       - postgres
       - redis
-    environment:
+    environment: 
       - DB_HOST=postgres
       - REDIS_HOST=redis
 
   postgres:
     image: postgres
-    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: abc123
       POSTGRES_DB: collab_editor
-    ports:
-      - "5432:5432"
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
   redis:
     image: redis

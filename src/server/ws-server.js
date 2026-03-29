@@ -4,7 +4,7 @@ const uuid = require("uuid");
 const path =  require("path");
 const { WebSocketServer } = require("ws");
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 const pool = require("../db/connection");
 const {
   saveOperation, 
@@ -14,12 +14,12 @@ const { reconstruction } = require("../db/reconstruct");
 const { Redis } = require("ioredis");
 
 const publisher = new Redis({
-  host: "redis",
+  host: process.env.REDIS_HOST || "redis",
   port: 6379,
 });
 
 const subscriber = new Redis({
-  host: "redis",
+  host: process.env.REDIS_HOST || "redis",
   port: 6379,
 });
 async function testConnection() {
@@ -262,6 +262,6 @@ wss.on("connection", (ws) => {
   });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log("Server running on port", PORT);
 });
